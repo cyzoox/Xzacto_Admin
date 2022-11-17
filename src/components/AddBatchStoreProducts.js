@@ -3,6 +3,7 @@ import { Text, StyleSheet, View, TextInput, ScrollView ,TouchableOpacity,Picker}
 import colors from "../themes/colors";
 import AppHeader from "./AppHeader";
 import EvilIcons from 'react-native-vector-icons/EvilIcons'
+import AntDesign from 'react-native-vector-icons/AntDesign'
 import uuid from 'react-native-uuid';
 import { FAB } from 'react-native-paper';
 import { useStore } from "../context/StoreContext";
@@ -13,6 +14,8 @@ import AlertwithChild from "./AlertwithChild";
 import { TextInput as TextInput2, Checkbox } from "react-native-paper";
 import AddVariants from "./AddVariants";
 import { set } from "react-native-reanimated";
+import { CheckBox } from "react-native-elements";
+import { Container, Header, Content, Accordion } from "native-base";
 const units = ["Kilo", "Gram", "Piece", "Liter","Bundle", "Dozen", "Whole", "Half-Dozen","Ounce", "Milliliter", "Milligrams", "Pack","Ream","Box","Sack","Serving","Gallon","Container","Bottle"]
 
 const AddBatchStoreProducts = ({navigation,route}) => {
@@ -20,8 +23,8 @@ const AddBatchStoreProducts = ({navigation,route}) => {
     const {user} = useAuth();
     const {createProducts,products, category,createDeliveryReport, createStoreDeliverySummary} = useStore();
     const [product_holder, setProductHolder] = useState([
-        {"no": uuid.v4(), "name": '', 'brand': '', 'qty': 0, 'unit': '', 'oprice': 0, 'sprice': 0, category:'', id: uuid.v4(), pr_id:uuid.v4(), addons:[{'name': 'test', 'price': 10}]},
-        {"no": uuid.v4(), "name": '', 'brand': '', 'qty': 0, 'unit': '', 'oprice': 0, 'sprice': 0, category:'', id: uuid.v4(), pr_id:uuid.v4(), addons:[{'name': 'test', 'price': 10}]}
+        {"no": uuid.v4(), "name": '', 'brand': '', 'qty': 0, 'unit': '', 'oprice': 0, 'sprice': 0, category:'', id: uuid.v4(), pr_id:uuid.v4(), addons:[], variants:[], options:[], withAddons: false, withOptions: false, withVariants: false},
+        {"no": uuid.v4(), "name": '', 'brand': '', 'qty': 0, 'unit': '', 'oprice': 0, 'sprice': 0, category:'', id: uuid.v4(), pr_id:uuid.v4(), addons:[], variants:[],  options:[], withAddons: false, withOptions: false, withVariants: false}
     ])
     const [sku, setSKU] = useState('')
     const [date, setDate] = useState(new Date())
@@ -39,6 +42,95 @@ const AddBatchStoreProducts = ({navigation,route}) => {
     const [options, setOptions] =useState([{"no": uuid.v4(),option:'option 1'},{"no": uuid.v4(),option:'option 2'},{"no": uuid.v4(),option:'option 3'}])
     const [addons, setAddons] =useState([{"no": uuid.v4(),name:'set name', price:0,cost:0},{"no": uuid.v4(),name:'set name', price:0,cost:0},{"no": uuid.v4(),name:'set name', price:0,cost:0}])
     const [optionData, setCreateOptionData] = useState([])
+    const [variantData, setCreateVariantsData] = useState([])
+    const [addonData, setCreateAddonData] = useState([])
+    const [withAddons, setWithAddons] = useState(false)
+    const [withOptions, setWithOptions] = useState(false)
+    const [withVariants, setWithVariants] = useState(false)
+    const [expended,setExpanded] = useState(false)
+    const [data, setData] = useState([
+      {
+        id:1,
+        month: 'January',
+        expenses: [
+          {
+            name: 'Rent',
+            value: 500,
+            
+          },
+          {
+            name: 'Food',
+            value: 230,
+          },
+          {
+            name: 'Gas',
+            value: 57,
+          },
+          {
+            name: 'Car',
+            value: 0,
+          },
+          {
+            name: 'Savings',
+            value: 717
+          }
+        ]
+      },
+      {
+        id:2,
+        month: 'February',
+        expenses: [
+          {
+            name: 'Rent',
+            value: 500,
+            
+          },
+          {
+            name: 'Food',
+            value: 200,
+          },
+          {
+            name: 'Gas',
+            value: 49,
+          },
+          {
+            name: 'Car',
+            value: 29,
+          },
+          {
+            name: 'Savings',
+            value: 870
+          }
+        ]
+      },
+      {
+        id:3,
+        month: 'Mars',
+        expenses: [
+          {
+            name: 'Rent',
+            value: 500,
+            
+          },
+          {
+            name: 'Food',
+            value: 231,
+          },
+          {
+            name: 'Gas',
+            value: 56,
+          },
+          {
+            name: 'Car',
+            value: 17,
+          },
+          {
+            name: 'Savings',
+            value: 760
+          }
+        ]
+      }
+    ])
   
 
     const onAddItem = () => {
@@ -53,13 +145,51 @@ const AddBatchStoreProducts = ({navigation,route}) => {
 
    const onAddVariants = () => {
     const items =  variants.concat([{"no": uuid.v4(),name:'set name', price:0,cost:0}])
-   setVariant(items)
+    setVariant(items)
  }
 
  const onAddAddons = () => {
   const items =  addons.concat([{"no": uuid.v4(),name:'set name', price:0,cost:0}])
- setAddons(items)
-}
+  setAddons(items)
+  }
+  console.log(product_holder)
+  const onUpdateAddons = () => {
+    const newArr = product_holder.map(obj => {
+      if (obj.id === addonData.id) {
+        return {...obj, addons: addons };
+      }
+    
+      return obj;
+    });
+
+    setProductHolder(newArr)
+    setAddonsVisible(false)
+  }
+
+  const onUpdateVariants = () => {
+    const newArr = product_holder.map(obj => {
+      if (obj.id === variantData.id) {
+        return {...obj, variants: variants };
+      }
+    
+      return obj;
+    });
+
+    setProductHolder(newArr)
+    setVariantVisible(false)
+  }
+  const onUpdateOptions = () => {
+    const newArr = product_holder.map(obj => {
+      if (obj.id === optionData.id) {
+        return {...obj, options: options };
+      }
+    
+      return obj;
+    });
+
+    setProductHolder(newArr)
+    setOptionVisible(false)
+  }
 
 
      const totalSupply = () => {
@@ -161,14 +291,32 @@ const handleRemoveVariants= no => {
 const handleRemoveAddons= no => {
   setOptions(addons.filter(item => item.no !== no))
 }
+
   const onCreateOptions = (item) => {
+      setOptions(item.options)
       setOptionVisible(true)
+      setWithOptions(true)
       setCreateOptionData(item)
   }
+  const onCreateVariants = (item) => {
+    setVariant(item.variants)
+    setVariantVisible(true)
+    setWithVariants(true)
+    setCreateVariantsData(item)
+}
+const onCreateAddons = (item) => {
+  setCreateAddonData(item)
+  setWithAddons(true)
+  setAddons(item.addons)
+  setAddonsVisible(true)
+ 
+}
+
+
 
   return (
       <View style={{flex: 1}}>
-        <AlertwithChild visible={optionsVisible} onCancel={()=> setOptionVisible(false)}  title="Add Options"  confirmTitle="S A V E" addButton={true} onPressAddbtn={()=> onAddOptions()}>
+        <AlertwithChild visible={optionsVisible} onProceed={onUpdateOptions} onCancel={()=> setOptionVisible(false)}  title="Add Options"  confirmTitle="S A V E" addButton={true} onPressAddbtn={()=> onAddOptions()}>
       
         <ScrollView>
        { options.map((element, index) =>
@@ -199,7 +347,7 @@ const handleRemoveAddons= no => {
         </ScrollView>
         </AlertwithChild>
 
-        <AddVariants visible={variantVisible} onCancel={()=> setVariantVisible(false)}  title="Add Variants"  confirmTitle="S A V E" addButton={true} onPressAddbtn={()=> onAddVariants()}>
+        <AddVariants visible={variantVisible} onProceed={onUpdateVariants} onCancel={()=> setVariantVisible(false)}  title="Add Variants"  confirmTitle="S A V E" addButton={true} onPressAddbtn={()=> onAddVariants()}>
         <View style={{flexDirection:'row',justifyContent:'center', marginVertical: 2, alignItems:'center'}}>
         <View style={{width: 150, marginHorizontal:2}}>
           <Text style={{fontWeight:'700', textAlign:'center', fontSize:15}}>Name</Text>
@@ -228,8 +376,8 @@ const handleRemoveAddons= no => {
               multiline={true}
               numberOfLines={1}
               onEndEditing={(e) => {
-                 element.option = e.nativeEvent.text;
-                 setOptions([...options]);
+                 element.name = e.nativeEvent.text;
+                 setVariant([...variants]);
                }}
             />
         </View>
@@ -243,8 +391,8 @@ const handleRemoveAddons= no => {
               multiline={true}
               numberOfLines={1}
               onEndEditing={(e) => {
-                 element.option = e.nativeEvent.text;
-                 setOptions([...options]);
+                 element.price = e.nativeEvent.text;
+                 setVariant([...variants]);
                }}
             />
         </View>
@@ -258,8 +406,8 @@ const handleRemoveAddons= no => {
               multiline={true}
               numberOfLines={1}
               onEndEditing={(e) => {
-                 element.option = e.nativeEvent.text;
-                 setOptions([...options]);
+                 element.cost = e.nativeEvent.text;
+                 setVariant([...variants]);
                }}
             />
         </View>
@@ -271,7 +419,7 @@ const handleRemoveAddons= no => {
       )}
       </ScrollView>
       </AddVariants>
-      <AddVariants visible={addonsVisible} onCancel={()=> setAddonsVisible(false)}  title="Add Addons"  confirmTitle="S A V E" addButton={true} onPressAddbtn={()=> onAddAddons()}>
+      <AddVariants visible={addonsVisible} onProceed={onUpdateAddons} onCancel={()=> setAddonsVisible(false)}  title="Add Addons"  confirmTitle="S A V E" addButton={true} onPressAddbtn={()=> onAddAddons()}>
         <View style={{flexDirection:'row',justifyContent:'center', marginVertical: 2, alignItems:'center'}}>
         <View style={{width: 150, marginHorizontal:2}}>
           <Text style={{fontWeight:'700', textAlign:'center', fontSize:15}}>Name</Text>
@@ -288,7 +436,7 @@ const handleRemoveAddons= no => {
         </View>
        
       <ScrollView>
-     { addons.map((element, index) =>
+     {addons.map((element, index) =>
                <View style={{flexDirection:'row',justifyContent:'center', marginVertical: 2, alignItems:'center'}}>
        <View style={{borderWidth: 1, width: 150, height: 35, borderRadius: 10, borderColor: colors.boldGrey, marginHorizontal:2}}>
             <TextInput
@@ -296,11 +444,11 @@ const handleRemoveAddons= no => {
               underlineColorAndroid = 'transparent'
               placeholderTextColor='red'
               disableFullscreenUI={true}
-              defaultValue={element.option}
+              defaultValue={element.name}
               multiline={true}
               numberOfLines={1}
               onEndEditing={(e) => {
-                 element.option = e.nativeEvent.text;
+                 element.name = e.nativeEvent.text;
                  setOptions([...options]);
                }}
             />
@@ -311,11 +459,11 @@ const handleRemoveAddons= no => {
               underlineColorAndroid = 'transparent'
               placeholderTextColor='red'
               disableFullscreenUI={true}
-              defaultValue={element.option}
+              defaultValue={element.price}
               multiline={true}
               numberOfLines={1}
               onEndEditing={(e) => {
-                 element.option = e.nativeEvent.text;
+                 element.price = e.nativeEvent.text;
                  setOptions([...options]);
                }}
             />
@@ -326,11 +474,11 @@ const handleRemoveAddons= no => {
               underlineColorAndroid = 'transparent'
               placeholderTextColor='red'
               disableFullscreenUI={true}
-              defaultValue={element.option}
+              defaultValue={element.cost}
               multiline={true}
               numberOfLines={1}
               onEndEditing={(e) => {
-                 element.option = e.nativeEvent.text;
+                 element.cost = e.nativeEvent.text;
                  setOptions([...options]);
                }}
             />
@@ -401,27 +549,22 @@ const handleRemoveAddons= no => {
          <ScrollView>
           <ScrollView showsHorizontalScrollIndicator horizontal contentContainerStyle={{flexDirection:'column', marginTop: 20}}>
           <View style={{flexDirection:'row'}}>
-          <Text style={{ marginHorizontal: 10, padding:5, borderRadius:25}}>       </Text>
+      
                <Text style={{width: 150, textAlign:'center', marginHorizontal:2, fontWeight:'700'}}>Product Name</Text>
-               <Text style={{width: 150, textAlign:'center', marginHorizontal:2, fontWeight:'700'}}>Brand</Text>
-               <Text style={{width: 150, textAlign:'center', marginHorizontal:2, fontWeight:'700'}}>Qty</Text>
+               <Text style={{width: 50, textAlign:'center', marginHorizontal:2, fontWeight:'700'}}>Qty</Text>
                <Text style={{width: 150, textAlign:'center', marginHorizontal:2, fontWeight:'700'}}>Unit</Text>
-               <Text style={{width: 150, textAlign:'center', marginHorizontal:2, fontWeight:'700'}}>Capital Price</Text>
-               <Text style={{width: 150, textAlign:'center', marginHorizontal:2, fontWeight:'700'}}>Selling Price</Text>
+               <Text style={{width: 50, textAlign:'center', marginHorizontal:2, fontWeight:'700'}}>Capital Price</Text>
+               <Text style={{width: 50, textAlign:'center', marginHorizontal:2, fontWeight:'700'}}>Selling Price</Text>
                <Text style={{width: 150, textAlign:'center', marginHorizontal:2, fontWeight:'700'}}>Category</Text>
+               <Text style={{width: 50, textAlign:'center', marginHorizontal:2, fontWeight:'700'}}>Variants</Text>
+               <Text style={{width: 50, textAlign:'center', marginHorizontal:2, fontWeight:'700'}}>Addons</Text>
+               <Text style={{width: 50, textAlign:'center', marginHorizontal:2, fontWeight:'700'}}>Options</Text>
            </View>
            {
                 product_holder.map((element, index) => 
                 <View style={{flexDirection:'column'}}>
             <View style={{flexDirection:'row', marginVertical: 3}}>
-            <TouchableOpacity onPress={()=> handleRemoveItem(element.no)} style={{backgroundColor:colors.red, justifyContent:'center', marginHorizontal: 10, padding:5, borderRadius:25}}>
-            <EvilIcons name={'trash'} size={26} color={colors.white}/>
            
-            </TouchableOpacity>
-            <TouchableOpacity onPress={()=> setAddonsVisible(true)} style={{backgroundColor:colors.red, justifyContent:'center', marginHorizontal: 10, padding:5, borderRadius:25}}>
-            <EvilIcons name={'plus'} size={26} color={colors.white}/>
-           
-            </TouchableOpacity>
             <View style={{borderWidth: 1, width: 150, height: 35, borderRadius: 10, borderColor: colors.boldGrey, marginHorizontal:2, flexDirection:'row'}}>
               <TextInput
                 style={{textAlign:'center', flex: 3, paddingBottom:0, paddingTop: 0}}
@@ -460,22 +603,8 @@ const handleRemoveAddons= no => {
                                 
                                 </Picker>
           </View>
-          <View style={{borderWidth: 1, width: 150, height: 35, borderRadius: 10, borderColor: colors.boldGrey, marginHorizontal:2}}>
-              <TextInput
-                style={{textAlign:'center', flex: 3, paddingBottom:0, paddingTop: 0}}
-                underlineColorAndroid = 'transparent'
-                placeholderTextColor='red'
-                disableFullscreenUI={true}
-                defaultValue={`${element.brand}`}
-                multiline={true}
-                numberOfLines={1}
-                onEndEditing={(e) => {
-                   element.brand = e.nativeEvent.text;
-                   setProductHolder([...product_holder]);
-                 }}
-              />
-          </View>
-          <View style={{borderWidth: 1, width: 150, height: 35, borderRadius: 10, borderColor: colors.boldGrey, marginHorizontal:2}}>
+   
+          <View style={{borderWidth: 1, width: 50, height: 35, borderRadius: 10, borderColor: colors.boldGrey, marginHorizontal:2}}>
               <TextInput
                 style={{textAlign:'center', flex: 3, paddingBottom:0, paddingTop: 0}}
                 underlineColorAndroid = 'transparent'
@@ -507,7 +636,7 @@ const handleRemoveAddons= no => {
                             
                             </Picker>
           </View>
-          <View style={{borderWidth: 1, width: 150, height: 35, borderRadius: 10, borderColor: colors.boldGrey, marginHorizontal:2}}>
+          <View style={{borderWidth: 1, width: 50, height: 35, borderRadius: 10, borderColor: colors.boldGrey, marginHorizontal:2}}>
               <TextInput
                 style={{textAlign:'center', flex: 3, paddingBottom:0, paddingTop: 0}}
                 underlineColorAndroid = 'transparent'
@@ -523,7 +652,7 @@ const handleRemoveAddons= no => {
                  }}
               />
           </View>
-          <View style={{borderWidth: 1, width: 150, height: 35, borderRadius: 10, borderColor: colors.boldGrey, marginHorizontal:2}}>
+          <View style={{borderWidth: 1, width: 50, height: 35, borderRadius: 10, borderColor: colors.boldGrey, marginHorizontal:2}}>
               <TextInput
                 style={{textAlign:'center', flex: 3, paddingBottom:0, paddingTop: 0}}
                 underlineColorAndroid = 'transparent'
@@ -555,19 +684,93 @@ const handleRemoveAddons= no => {
                             
                             </Picker>
           </View>
+          <View style={{ width: 50, height: 35,  borderColor: colors.boldGrey, marginHorizontal:2, justifyContent:"center", alignItems:'center'}}>
+            <CheckBox
+                  center
+                  checked={element.withVariants}
+                  onPress={() => { onCreateVariants(element), element.withVariants = !element.withVariants}}
+                />          
+          </View>
+          <View style={{ width: 50, height: 35, borderColor: colors.boldGrey, marginHorizontal:2, justifyContent:"center", alignItems:'center'}}>
+            <CheckBox
+                  center
+                  checked={element.withAddons}
+                  onPress={() =>{ onCreateAddons(element),  element.withAddons = !element.withAddons}}
+                />          
+          </View>
+      
+          <View style={{ width: 50, height: 35, borderColor: colors.boldGrey, marginHorizontal:2, justifyContent:"center", alignItems:'center'}}>
+            <CheckBox
+                  center
+                  checked={element.withOptions}
+                  onPress={() => { onCreateOptions(element), element.withOptions = !element.withOptions}}
+                />          
+          </View>
+        
+          <View style={{flexDirection: 'row'}}>
+          <TouchableOpacity onPress={()=> handleRemoveItem(element.no)} style={{backgroundColor:colors.red, justifyContent:'center', marginHorizontal: 10, padding:5, borderRadius:25}}>
+            <EvilIcons name={'trash'} size={26} color={colors.white}/>
+           
+            </TouchableOpacity>
+          </View>
+       
             </View>
-            <View>
-             { element.addons.map((element, index) => 
-             <View style={{flexDirection:'row'}}>
-                <Text>{element.name}</Text>
-                <Text>{element.price}</Text>
-              </View>  
-              )}
+          {element.addons.length === 0 ? null :  <View style={{ flex: 1, flexDirection:'column',marginLeft: 20}}>
+              <Text style={{fontSize: 18}}>Addons</Text>
+              <View style={{flexDirection:"row"}}>
+                <Text style={{width: 100, textAlign:'center', fontWeight:'bold'}}>Name</Text>
+                <Text  style={{width: 50, textAlign:'center', fontWeight:'bold'}}>Price</Text>
+                <Text  style={{width: 50, textAlign:'center', fontWeight:'bold'}}>Cost</Text>
+              </View>
+            {
+              element.addons.map((element, index) => 
+              <View style={{flexDirection:"row", marginVertical:5}}>
+              <Text style={{width: 100, textAlign:'center'}}>{element.name}</Text>
+              <Text  style={{width: 50, textAlign:'center'}}>{element.price}</Text>
+              <Text  style={{width: 50, textAlign:'center'}}>{element.cost}</Text>
             </View>
+              )
+            }
+          </View>}
+
+  {  element.variants.length  === 0 ? null :     <View style={{ flex: 1, flexDirection:'column',marginLeft: 20}}>
+              <Text style={{fontSize: 18}}>Variants</Text>
+              <View style={{flexDirection:"row"}}>
+                <Text style={{width: 100, textAlign:'center', fontWeight:'bold'}}>Name</Text>
+                <Text  style={{width: 50, textAlign:'center', fontWeight:'bold'}}>Price</Text>
+                <Text  style={{width: 50, textAlign:'center', fontWeight:'bold'}}>Cost</Text>
+              </View>
+            {
+              element.variants.map((element, index) => 
+              <View style={{flexDirection:"row", marginVertical:5}}>
+              <Text style={{width: 100, textAlign:'center'}}>{element.name}</Text>
+              <Text  style={{width: 50, textAlign:'center'}}>{element.price}</Text>
+              <Text  style={{width: 50, textAlign:'center'}}>{element.cost}</Text>
+            </View>
+              )
+            }
+          </View>}
+
+    {   element.options.length  === 0 ? null :     <View style={{ flex: 1, flexDirection:'column',marginLeft: 20}}>
+              <Text style={{fontSize: 18}}>Options</Text>
+              <View style={{flexDirection:"row"}}>
+                <Text style={{width: 100, textAlign:'center', fontWeight:'bold'}}>Option</Text>
+              </View>
+            {
+              element.options.map((element, index) => 
+              <View style={{flexDirection:"row", marginVertical:5}}>
+              <Text style={{width: 100, textAlign:'center'}}>{element.option}</Text>
+        
+            </View>
+              )
+            }
+          </View>}
+     
             </View>
                 )}
          
           </ScrollView>
+        
           </ScrollView>
           <FAB
                 icon="plus"
@@ -611,6 +814,55 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
   },
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingBottom:20,
+    backgroundColor: '#F6483B'
+  },
+  accordion:{
+    width: '90%',
+    backgroundColor: '#F2F2F7',
+    borderRadius: 10,
+    padding:20,
+    justifyContent: 'center'
+  },
+  accordionHeader: {
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    flexDirection: 'row',
+    marginVertical: 10,
+    backgroundColor: 'white',
+    borderRadius: 5,
+    padding:10,    
+
+  },
+  accordionTitle: {
+    fontSize: 20, 
+    fontWeight:'bold',
+    marginBottom: 20,
+    color: '#62625A'
+  },
+  accordionItems: {
+    borderRadius: 5,
+    backgroundColor:'white',
+
+  },
+  accordionItemValue:{
+    flexDirection: 'row',
+    justifyContent:"space-between",
+    padding: 10,
+
+  },
+  accordionItemValueBadge: {
+    color: '#42C382',
+    padding: 5,
+    fontWeight: 'bold'
+  },
+  accordionItemValueName: {
+    color: '#62625A'
+  }
 });
 
 export default AddBatchStoreProducts;
